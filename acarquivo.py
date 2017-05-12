@@ -26,6 +26,7 @@ def formata_arquivo_acidente(arquivo,col_id,col_data_hora,cabecalho,tipo_arquivo
 
 		elif tipo_arquivo == 'bhtrans':
 			hora = data_hora_temp.split(' ')[1]
+			#Verifica em qual formato a data está
 			if '/' in data_hora_temp:
 				if data_hora_temp.split('/')[3]>31: #testar se esta fora do formato YYYY-MM-DD
 					data=data_hora_temp.split('/')[2]+'-'+data_hora_temp.split('/')[1]+'-'+data_hora_temp.split('/')[0]
@@ -37,6 +38,7 @@ def formata_arquivo_acidente(arquivo,col_id,col_data_hora,cabecalho,tipo_arquivo
 					data=data_hora_temp.split('-')[2]+'-'+data_hora_temp.split('-')[1]+'-'+data_hora_temp.split('-')[0]
 				else:
 					data = data_hora_temp
+		#Se o arquivo nao for do waze nem da bhtrans, exibe mensagem de erro e sai da funcao
 		else:
 			print "Tipo de arquivo nao suportado!"
 			return
