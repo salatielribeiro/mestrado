@@ -45,9 +45,9 @@ def formata_arquivo_acidente(arquivo,col_id,col_data_hora,cabecalho,tipo_arquivo
 		data_hora = data+' '+hora
 		
 		if col_id < col_data_hora:
-			linha_saida = id+';'+data_hora+';'+data+';'+hora+';'+';'.join(atributos[:col_id])+';'+';'.join(atributos[col_id+1:col_data_hora])+';'+';'.join(atributos[col_data_hora+1:])+'\n'
+			linha_saida = id+';'+data_hora+';'+data+';'+hora+';'+';'.join(atributos[:col_id])+';'+';'.join(atributos[col_id+1:col_data_hora])+';'+';'.join(atributos[col_data_hora:])+'\n'
 		else:
-			linha_saida =  id+';'+data_hora+';'+data+';'+hora+';'+';'.join(atributos[:col_data_hora])+';'+';'.join(atributos[col_data_hora+1:col_id])+';'+';'.join(atributos[col_id+1:])+'\n'
+			linha_saida =  id+';'+data_hora+';'+data+';'+hora+';'+';'.join(atributos[:col_data_hora])+';'+';'.join(atributos[col_data_hora:col_id])+';'+';'.join(atributos[col_id:])+'\n'
 		arquivo_saida.write(linha_saida)
 
 	arquivo_.close()
