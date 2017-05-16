@@ -21,8 +21,12 @@ def formata_arquivo_acidente(arquivo,col_id,col_data_hora,cabecalho,tipo_arquivo
 		linha_saida	= ''
 
 		if tipo_arquivo == 'waze':
-			data = millis_para_data(float(data_hora_temp), '%Y-%m-%d').date()	
-			hora = millis_para_data(float(data_hora_temp), '%H:%M:%S').time()
+			try:
+				data_hora_temp == float(data_hora_temp)
+			except ValueError:
+   				data_hora_temp = 0.0
+			data = millis_para_data(data_hora_temp, '%Y-%m-%d').date()	
+			hora = millis_para_data(data_hora_temp, '%H:%M:%S').time()
 
 		elif tipo_arquivo == 'bhtrans':
 			hora = data_hora_temp.split(' ')[1]
