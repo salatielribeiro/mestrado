@@ -21,8 +21,8 @@ def formata_arquivo_acidente(arquivo,col_id,col_data_hora,cabecalho,tipo_arquivo
 		linha_saida	= ''
 
 		if tipo_arquivo == 'waze':
-			data = millis_para_data(float(data_hora_temp), '%Y-%m-%d')	
-			hora = millis_para_data(float(data_hora_temp), '%H:%M:%S')
+			data = millis_para_data(float(data_hora_temp), '%Y-%m-%d').date()	
+			hora = millis_para_data(float(data_hora_temp), '%H:%M:%S').time()
 
 		elif tipo_arquivo == 'bhtrans':
 			hora = data_hora_temp.split(' ')[1]
@@ -42,10 +42,10 @@ def formata_arquivo_acidente(arquivo,col_id,col_data_hora,cabecalho,tipo_arquivo
 		else:
 			print "Tipo de arquivo nao suportado!"
 			return
-		data_hora = data+' '+hora
+		data_hora = str(data)+' '+str(hora)
 		
 		if col_id < col_data_hora:
-			linha_saida = id+';'+data_hora+';'+data+';'+hora+';'+';'.join(atributos[:col_id])+';'+';'.join(atributos[col_id+1:col_data_hora])+';'+';'.join(atributos[col_data_hora:])+'\n'
+			linha_saida = id+';'+str(data_hora)+';'+str(data)+';'+str(hora)+';'+';'.join(atributos[:col_id])+';'+';'.join(atributos[col_id+1:col_data_hora])+';'+';'.join(atributos[col_data_hora:])+'\n'
 		else:
 			linha_saida =  id+';'+data_hora+';'+data+';'+hora+';'+';'.join(atributos[:col_data_hora])+';'+';'.join(atributos[col_data_hora:col_id])+';'+';'.join(atributos[col_id:])+'\n'
 		arquivo_saida.write(linha_saida)
