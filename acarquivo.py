@@ -58,3 +58,25 @@ def formata_arquivo_acidente(arquivo,col_id,col_data_hora,cabecalho,tipo_arquivo
 	if apagar == True:
 		os.remove(arquivo)
 		os.rename(arquivo.replace('.csv','')+'_saida.csv',arquivo)
+
+#Dada um arquivo de acidentes e uma categoria, cria um arquivo apenas com essa categoria
+def separa_tipo(arquivo_,tipo_,col_tipo):
+	arquivo = open(arquivo_,'r')
+	saida 	= open(arquivo_.replace('.csv','')+'Tipo.csv','w')
+
+	for linha in arquivo:
+		atributos = linha.split(';')
+		tipo	  = atributos[col_tipo]
+		if tipo == tipo_:
+			saida.write(linha)
+	arquivo.close()
+	saida.close()	
+
+
+
+
+
+
+
+
+
