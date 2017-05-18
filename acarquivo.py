@@ -155,8 +155,11 @@ def mescla_acidentes_repetidos(arquivo_,col_id,col_data_hora,col_usu,col_rua,col
 	with open(arquivo_,'r') as arquivo:
 		acidentes_aux = arquivo.read().splitlines()
 	arquivo.close()
-
+	
+	acidentes_temp = []
 	for entrada in acidentes:
-		
+		acidentes_temp.append(entrada.split(';'))
+	
+	print acidentes_temp [0]
 
 
