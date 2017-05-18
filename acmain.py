@@ -14,7 +14,7 @@ def main():
 	#vis_acidentes_dia(caminho_arquivo_waze,1)
 	#separa_tipo(caminho_arquivo_waze_ev,'POLICE',12)
 	#entradas_repetidas(caminho_arquivo_waze,0,1,18,9,10,11)
-	mescla_acidentes_repetidos(caminho_arquivo_waze,registros,0)
+	mescla_acidentes_repetidos(caminho_arquivo_waze,0,1,18,9,10,11)
 
 if __name__ == "__main__":
     main()
