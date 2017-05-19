@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 
-#Dadas duas horas, retorna a difetenca entre elas em minutos
+#Dadas duas horas, retorna a difetenca entre elas em minutos hora em datetime
 def diferenca_tempo(hora1,hora2):
 	if(hora1>hora2):
 		dif = (hora1.hour - hora2.hour)*60 + hora1.minute - hora2.minute + (hora1.second - hora2.second)/60.0

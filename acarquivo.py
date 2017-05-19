@@ -145,21 +145,77 @@ def exclui_registros(arquivo_,id_lista,col_id):
 #Dada um arquivo de acidentes encontra entradas de acidentes notificados mais de uma vez por diferentes usuarios
 #Sera considerado o mesmo acidente se: 1) registros com menos de uma hora de diferenca 2)menos de 50m de distancia 
 def mescla_acidentes_repetidos(arquivo_,col_id,col_data_hora,col_usu,col_rua,col_x,col_y):
-	repetidos     = []
-	acidentes	= []
-	acidentes_aux   = []
-	num_linha = 0
+	#Manter uma lista com os acidentes,uma com os ids dos acidentes repetidos (para que eles nao sejam contados mais de uma vez) e uma com
+	#os acidentes apos serem mesclados
+	acidentes		= []
+	acidentes_repetidos     = [] 
+	acidentes_novo		= []
+
 	with open(arquivo_,'r') as arquivo:
 		acidentes = arquivo.read().splitlines()
 	arquivo.close()
-	with open(arquivo_,'r') as arquivo:
-		acidentes_aux = arquivo.read().splitlines()
-	arquivo.close()
+	num_linha 	  = 0
 	
-	acidentes_temp = []
-	for entrada in acidentes:
-		acidentes_temp.append(entrada.split(';'))
+	#Parte I: procura os acidentes reportados mais de uma vez
+	for registro in acidentes:
+		#Armazena o os acidentes que casaram para cada rodada
+		#Flag pra verificar se o acidente analisando no momento deve ou nao ser inserido em acidentes_repetidos
+		acidentes_casados = []
+		flag_id_match	  = 0
+
+		atributos = registro.split(';')
+		id        = atributos[col_id]
+		data	  = atributos[col_data_hora].split(' ')[0]
+		usuario	  = atributos[col_usu]
+		rua	  = atributos[col_rua]
+		x	  = atributos[col_x]
+		y	  = atributos[col_y]
+		acidentes_casados.append(registro)
+		
+		num_linha = num_linha +1
+		print num_linha	
+		for registro_ in acidentes:
+			atributos_ = registro_.split(';')
+			id_        = atributos_[col_id]
+			data_	   = atributos_[col_data_hora].split(' ')[0]
+			usuario_   = atributos_[col_usu]
+			rua_	   = atributos_[col_rua]
+			x_	   = atributos_[col_x]
+			y_	   = atributos_[col_y]
+			if id_ not in acidentes_repetidos and id not in acidentes_repetidos and id != id_:
+				if data == data_:
+					hora      = datetime.datetime.strptime(atributos[col_data_hora].split(' ')[1], '%H:%M:%S')
+					hora_ 	  = datetime.datetime.strptime(atributos_[col_data_hora].split(' ')[1],'%H:%M:%S')
+					dif_tempo = diferenca_tempo(hora,hora_)
+					distancia = distancia_entre_pontos((x,y),(x_,y_))
+					if dif_tempo <= 60.00 and distancia <= 50.00:
+						acidentes_casados.append(registro_)
+						acidentes_repetidos.append(id_)
+						flag_id_match = 1
+		if flag_id_match == 1:
+			acidentes_repetidos.append(id)
+		else:
+			acidentes_novo.append(registro)		
+
+	print "\nNumeros: "+str(len(acidentes_novos))+','+str(len(acidentes_casados))
+	#Parte II:
 	
-	print acidentes_temp [0]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
