@@ -7,10 +7,10 @@ import ogr
 def distancia_entre_pontos(ponto_1,ponto_2):
 	return (vincenty(ponto_1,ponto_2).meters)
 
-def centroide(poly):
-	return poly.Centroid()
+#def centroide(poly):
+#	return poly.Centroid()
 
-def create_polygon(coords):          
+def centroide(coords):          
     ring = ogr.Geometry(ogr.wkbLinearRing)
     for coord in coords:
         ring.AddPoint(coord[0], coord[1])
@@ -21,4 +21,4 @@ def create_polygon(coords):
     poly = ogr.Geometry(ogr.wkbPolygon)
     poly.AddGeometry(ring)
     #return poly.ExportToWkt()
-    return poly
+    return poly.Centroid()

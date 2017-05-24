@@ -4,6 +4,7 @@ from acarquivo import *
 #from acvisualizacoes import *
 import math
 from acgeo import *
+import datetime
 
 def main():
 	caminho_arquivo_waze 	= '/home/salatiel/Desktop/dados/belo_horizonte/acidentes/waze/acidentes_belo_horizonte_waze_0716_0517.csv'
@@ -17,9 +18,9 @@ def main():
 	#separa_tipo(caminho_arquivo_waze_ev,'POLICE',12)
 	#entradas_repetidas(caminho_arquivo_waze,0,1,18,9,10,11)
 	#mescla_acidentes_repetidos(caminho_arquivo_waze,0,1,18,9,10,11)
-
-
-	print create_polygon([(-43.937423,-19.905825),(-43.937446,-19.906172),(-43.936446,-19.905172)])
-
+	#verifica_mescla(caminho_arquivo_waze,0)
+	teste_banco(caminho_arquivo_waze,0,1,18,9,10,11)
+	
+	
 if __name__ == "__main__":
     main()
