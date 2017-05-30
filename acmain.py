@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from acarquivo import *
-#from acvisualizacoes import *
+from acfile import *  # @UnusedWildImport
+from acvis import *  # @UnusedWildImport
 
 def main():
-	caminho_arquivo_waze 	= '/home/salatiel/Desktop/dados/belo_horizonte/acidentes/waze/acidentes_belo_horizonte_waze_0716_0517.csv'
+	waze_file_path 	= '/home/salatiel/Desktop/dados/belo_horizonte/acidentes/waze/acidentes_belo_horizonte_waze_0716_0517.csv'
 	#caminho_arquivo_waze_ev	= '/home/salatiel/Desktop/dados/belo_horizonte/acidentes/waze/eventos_belo_horizonte_waze_0716_0517.csv'
 	#caminho_arquivo_bhtrans = '/home/salatiel/Desktop/dados/belo_horizonte/acidentes/bh_trans/'
-	teste_banco(caminho_arquivo_waze,0,1,18,9,10,11)
+	#merge_duplicate_events(waze_file_path,0,1,18,9,10,11)
+	vis_events_by_time(waze_file_path)
 if __name__ == "__main__":
 	main()
