@@ -21,4 +21,3 @@ def vis_events_by_day_of_week(file_,col_date_time):
 	pass
 def vis_events(file_,col_date_time):
 	pass
-
