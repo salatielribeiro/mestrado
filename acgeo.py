@@ -1,16 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*
 from geopy.distance import vincenty
-from datetime import datetime
 import ogr
 
-def distancia_entre_pontos(ponto_1,ponto_2):
-	return (vincenty(ponto_1,ponto_2).meters)
+def distance_between_points(point_1,point_2):
+	distance = vincenty(point_1,point_2).meters  # @IndentOk
+	return distance
 
-#def centroide(poly):
-#	return poly.Centroid()
-
-def centroide(coords):          
+def centroid(coords):          
     ring = ogr.Geometry(ogr.wkbLinearRing)
     for coord in coords:
         ring.AddPoint(coord[0], coord[1])

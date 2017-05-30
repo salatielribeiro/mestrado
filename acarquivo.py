@@ -1,23 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from acdata import *
-from acgeo import *
+from acdata import *  # @UnusedWildImport
+from acgeo import *  # @UnusedWildImport
 import os
-import datetime
+import datetime  # @Reimport
 import time
 import psycopg2
 import pandas as pd
 import numpy as np
 
 #Dado um arquivo csv de eventos, retorna com dataframe com esses dados
-def csv_para_dataframe(arquivo):
+def csv_to_dataframe(file_in):
 	dtype=	{
 		"id":str,"datetime_event":object,"date_event":object,"time_event":object,"starttime":object,"endtime":object,"uuid":str,\
 	      	"country":str,"city":str,"street":str,"lon":float,"lat":float,"type_event":str,"subtype_event":str,"speed":float,"road_type":int,"reliability":int,\
 		"confidence":int,"report_by":str,"report_mood":int,"report_rating":int,"in_scale":str,"is_jam_unified_alert":str,"show_facebook_pic":str,\
 		"n_comments":int,"n_images":int,"n_thumbs_up":int,"datetime_pubmillis":int,"mgvar":str,"comments":str,"additional_info":object
 		}
-	df 			= pd.read_csv(arquivo,sep=';',dtype=dtype)
+	df 			= pd.read_csv(file_in,sep=';',dtype=dtype)
 	df['datetime_event']	= pd.to_datetime(df['datetime_event'])
 	df['date_event']	= pd.to_datetime(df['date_event'], format='%Y-%m-%d')
 	df['time_event']	= pd.to_datetime(df['time_event'], format='%H:%M:%S').dt.time
@@ -26,264 +26,208 @@ def csv_para_dataframe(arquivo):
 #Dado um arquivo de acidente, coloca-lo no formato adequado. Os primeiros campos sao id,data e hora, data, hora, tipo e subtipo
 #Os outros atributos vem em seguida
 #Formato data: '%Y-%m-%d %H:%M:%S'
-def formata_arquivo_acidente(arquivo,col_id,col_data_hora,cabecalho,tipo_arquivo,apagar):
-	arquivo_ = open(arquivo,'r')
-	arquivo_saida = open(arquivo.replace('.csv','')+'_saida.csv','w')
+def format_event_file(file_,col_id,col_date_time,header,file_type,erase_file):  # @ReservedAssignment
+	file_in = open(file_,'r')
+	file_out = open(file_.replace('.csv','')+'_saida.csv','w')
 
-	if cabecalho == True:
-		cabecalho_ = arquivo_.readline()	
+	if header == True:
+		_header_ = file_.readline()	
 
-	for linha in arquivo_:
-		atributos 	= linha.replace('\n','').split(';')
-		data_hora_temp 	= atributos[col_data_hora]
-		id = atributos [col_id]
-		linha_saida	= ''
+	for row in file_in:
+		attributes 	= row.replace('\n','').split(';')
+		date_time_temp 	= attributes[col_date_time]
+		id = attributes [col_id]  # @ReservedAssignment
+		row_out	= ''
 
-		if tipo_arquivo == 'waze':
+		if file_type == 'waze':
 			try:
-				data_hora_temp == float(data_hora_temp)
+				date_time_temp == float(date_time_temp)  # @NoEffect
 			except ValueError:
-   				data_hora_temp = 0.0
-			data = millis_para_data(data_hora_temp, '%Y-%m-%d').date()	
-			hora = millis_para_data(data_hora_temp, '%H:%M:%S').time()
+				date_time_temp = 0.0  
+			date = millis_to_date(date_time_temp, '%Y-%m-%d').date()	
+			time = millis_to_date(date_time_temp, '%H:%M:%S').time()
 
-		elif tipo_arquivo == 'bhtrans':
-			hora = data_hora_temp.split(' ')[1]
+		elif file_type == 'bhtrans':
+			time = date_time_temp.split(' ')[1]
 			#Verifica em qual formato a data está
-			if '/' in data_hora_temp:
-				if data_hora_temp.split('/')[3]>31: #testar se esta fora do formato YYYY-MM-DD
-					data=data_hora_temp.split('/')[2]+'-'+data_hora_temp.split('/')[1]+'-'+data_hora_temp.split('/')[0]
+			if '/' in date_time_temp:
+				if date_time_temp.split('/')[3]>31: #testar se esta fora do formato YYYY-MM-DD
+					date=date_time_temp.split('/')[2]+'-'+date_time_temp.split('/')[1]+'-'+date_time_temp.split('/')[0]
 				else:
-					data=data_hora_temp.split('/')[0]+'-'+data_hora_temp.split('/')[1]+'-'+data_hora_temp.split('/')[2]
+					date=date_time_temp.split('/')[0]+'-'+date_time_temp.split('/')[1]+'-'+date_time_temp.split('/')[2]
 			
-			elif '-' in data_hora_temp:
-				if data_hora_temp.split('-')[3]>31: #testar se esta fora do formato YYYY-MM-DD
-					data=data_hora_temp.split('-')[2]+'-'+data_hora_temp.split('-')[1]+'-'+data_hora_temp.split('-')[0]
+			elif '-' in date_time_temp:
+				if date_time_temp.split('-')[3]>31: #testar se esta fora do formato YYYY-MM-DD
+					date=date_time_temp.split('-')[2]+'-'+date_time_temp.split('-')[1]+'-'+date_time_temp.split('-')[0]
 				else:
-					data = data_hora_temp
+					date = date_time_temp
 		#Se o arquivo nao for do waze nem da bhtrans, exibe mensagem de erro e sai da funcao
 		else:
-			print "Tipo de arquivo nao suportado!"
+			print "File not supported!"
 			return
-		data_hora = str(data)+' '+str(hora)
+		date_time = str(date)+' '+str(time)
 		
-		if col_id < col_data_hora:
-			linha_saida = id+';'+str(data_hora)+';'+str(data)+';'+str(hora)+';'+';'.join(atributos[:col_id])+';'+';'.join(atributos[col_id+1:col_data_hora])+';'+';'.join(atributos[col_data_hora:])+'\n'
+		if col_id < col_date_time:
+			row_out = id+';'+str(date_time)+';'+str(date)+';'+str(time)+';'+';'.join(attributes[:col_id])+';'+';'.join(attributes[col_id+1:col_date_time])+';'+';'.join(attributes[col_date_time:])+'\n'
 		else:
-			linha_saida =  id+';'+data_hora+';'+data+';'+hora+';'+';'.join(atributos[:col_data_hora])+';'+';'.join(atributos[col_data_hora:col_id])+';'+';'.join(atributos[col_id:])+'\n'
-		arquivo_saida.write(linha_saida)
+			row_out =  id+';'+date_time+';'+date+';'+time+';'+';'.join(attributes[:col_date_time])+';'+';'.join(attributes[col_date_time:col_id])+';'+';'.join(attributes[col_id:])+'\n'
+		file_out.write(row_out)
 
-	arquivo_.close()
-	if apagar == True:
-		os.remove(arquivo)
-		os.rename(arquivo.replace('.csv','')+'_saida.csv',arquivo)
+	file_.close()
+	if erase_file == True:
+		os.remove(file_)
+		os.rename(file_.replace('.csv','')+'_saida.csv',file_)
 
 #Dada um arquivo de acidentes e uma categoria, cria um arquivo apenas com essa categoria
-def separa_tipo(arquivo_,tipo_,col_tipo):
-	arquivo = open(arquivo_,'r')
-	saida 	= open(arquivo_.replace('.csv','')+'Tipo.csv','w')
+def split_type(file_,type_,col_type):
+	file_in = open(file_,'r')  # @ReservedAssignment
+	file_out 	= open(file_.replace('.csv','')+'Tipo.csv','w')
 
-	for linha in arquivo:
-		atributos = linha.split(';')
-		tipo	  = atributos[col_tipo]
-		if tipo == tipo_:
-			saida.write(linha)
-	arquivo.close()
-	saida.close()	
+	for row in file_in:
+		attributes = row.split(';')
+		type	  = attributes[col_type]  # @ReservedAssignment
+		if type == type_:
+			file_out.write(row)
+	file.close()
+	file_out.close()	
 
 
 #Dada um arquivo de acidentes encontra entradas repetidas
 #Nao basta olhar apenas o ID (o usuario pode criar duas contribuicoes com ids diferentes referentes ao mesmo acidentes)
 #Sera considerado o mesmo acidente se: 1) registros com menos de uma hora de diferenca 2)menos de 50m de distancia 3)Mesmo usuario 4)Mesma rua
-def entradas_repetidas(arquivo_,col_id,col_data_hora,col_usu,col_rua,col_x,col_y):
-	repetidos     = []
-	acidentes	= []
-	acidentes_aux   = []
-	num_linha = 0
-	with open(arquivo_,'r') as arquivo:
-		acidentes = arquivo.read().splitlines()
-	arquivo.close()
-	with open(arquivo_,'r') as arquivo:
-		acidentes_aux = arquivo.read().splitlines()
-	arquivo.close()
+def delete_duplicate_events(file_,col_id,col_date_time,col_user,col_street,col_x,col_y):
+	duplicate     = []
+	row_number = 0
+	with open(file_,'r') as file_in:  # @ReservedAssignment
+		events = file_in.read().splitlines()
+	file_in.close()
+	with open(file_,'r') as file_in:  # @ReservedAssignment
+		events_tmp = file_in.read().splitlines()
+	file_in.close()
 
-	for linha in acidentes:
-		num_linha = num_linha + 1
-		print num_linha
-		atributos = linha.split(';')
-		id        = atributos[col_id]
-		data	  = atributos[col_data_hora].split(' ')[0]
-		usuario	  = atributos[col_usu]
-		rua	  = atributos[col_rua]
-		x	  = atributos[col_x]
-		y	  = atributos[col_y]
+	for row in events:
+		row_number += 1
+		print row_number
+		attributes = row.split(';')
+		id        = attributes[col_id]  # @ReservedAssignment
+		date	  = attributes[col_date_time].split(' ')[0]
+		user	  = attributes[col_user]
+		sreet	  = attributes[col_street]
+		x	  = attributes[col_x]
+		y	  = attributes[col_y]
 
-		for linha_aux in acidentes_aux:
-			atributos_aux = linha_aux.split(';')
-			id_aux       = atributos_aux[col_id]
-			data_aux     = atributos_aux[col_data_hora].split(' ')[0]
-			usuario_aux  = atributos_aux[col_usu]
-			rua_aux      = atributos_aux[col_rua]
-			x_aux	     = atributos_aux[col_x]
-			y_aux	     = atributos_aux[col_y]
+		for row_aux in events_tmp:
+			attributes_tmp = row_aux.split(';')
+			id_tmp       = attributes_tmp[col_id]
+			date_tmp     = attributes_tmp[col_date_time].split(' ')[0]
+			user_tmp     = attributes_tmp[col_user]
+			street_tmp   = attributes_tmp[col_street]
+			x_tmp	     = attributes_tmp[col_x]
+			y_tmp	     = attributes_tmp[col_y]
 
 
-			if data == data_aux and usuario == usuario_aux and rua == rua_aux and id != id_aux and usuario != ''  :
-				hora      	= datetime.datetime.strptime(atributos[col_data_hora].split(' ')[1], '%H:%M:%S')
-				hora_aux     	= datetime.datetime.strptime(atributos_aux[col_data_hora].split(' ')[1], '%H:%M:%S')
-				dif_tempo 		= diferenca_tempo(hora,hora_aux)
-				distancia 	= distancia_entre_pontos((x,y),(x_aux,y_aux))
-				if sorted((id,id_aux)) not in repetidos and dif_tempo <= 30.0 and distancia <=50.0:
-					repetidos.append(sorted((id,id_aux)))
-	return repetidos
+			if date == date_tmp and user == user_tmp and sreet == street_tmp and id != id_tmp and user != ''  :
+				time      	= datetime.datetime.strptime(attributes[col_date_time].split(' ')[1], '%H:%M:%S')
+				time_tmp     	= datetime.datetime.strptime(attributes_tmp[col_date_time].split(' ')[1], '%H:%M:%S')
+				time_difference	= time_difference(time,time_tmp)
+				distance 	= distance_between_points((x,y),(x_tmp,y_tmp))
+				if sorted((id,id_tmp)) not in duplicate and time_difference <= 30.0 and distance <=50.0:
+					duplicate.append(sorted((id,id_tmp)))
+	return duplicate
 
 #Dado um arquivo e os ids dos registros a serem excluidos, cria um novo arquivo sem esses registros e exclui o antigo
-def exclui_registros(arquivo_,id_lista,col_id):
-	arquivo       =	open(arquivo_,'r')
-	arquivo_saida = open(arquivo_.replace('.csv','')+'_saida.csv','w')
+def delete_entries(file_,id_list,col_id):
+	file_in       =	open(file_,'r')  # @ReservedAssignment
+	file_out = open(file_.replace('.csv','')+'_saida.csv','w')
 	
-	for linha in arquivo:
+	for linha in file_in:
 		atributos = linha.split(';')
-		id = atributos[col_id]
+		id = atributos[col_id]  # @ReservedAssignment
 		match_id = 0
-		for id_ in id_lista:		
+		for id_ in id_list:		
 			if id == id_[0]:
 				match_id = 1
 				break
 		if match_id == 0:
-			arquivo_saida.write(linha)
+			file_out.write(linha)
 
-	arquivo.close()
-	arquivo_saida.close()
-	os.remove(arquivo_)
-	os.rename(arquivo_.replace('.csv','')+'_saida.csv',arquivo_)
+	file_in.close()
+	file_out.close()
+	os.remove(file_)
+	os.rename(file_.replace('.csv','')+'_saida.csv',file_)
 
-#Dada um arquivo de acidentes encontra entradas de acidentes notificados mais de uma vez por diferentes usuarios
+#Dada um file_in de acidentes encontra entradas de acidentes notificados mais de uma vez por diferentes usuarios
 #Sera considerado o mesmo acidente se: 1) registros com menos de uma hora de diferenca 2)menos de 50m de distancia 
 #Manter uma lista com os acidentes,uma com os ids dos acidentes repetidos (para que eles nao sejam contados mais de uma vez) e uma com
 #os acidentes apos serem mesclados
-def mescla_acidentes_repetidos(arquivo_,col_id,col_data_hora,col_usu,col_rua,col_x,col_y):
-	acidentes		= []
-	acidentes_temp		= []
-	registros_analisados	= []
-	acidentes_novo		= []
-	numero_linhas		= 0
-
-	#Salva os acidentes do arquivo numa lista e depois a ordena pela data do acidente
-	entrada = open(arquivo_,'r') 
-	for registro in entrada:
-		atributos = registro.replace('\n','').split(';')
-		data	  = atributos[col_data_hora].split(' ')[0]
-		acidentes_temp.append((data,registro.replace('\n','')))
-	entrada.close()
-	
-	acidentes = list(zip(*sorted(acidentes_temp[:]))[1])
-
-	for registro in acidentes[:]:
-		numero_linhas += 1
-		print numero_linhas
-
-		atributos = registro.replace('\n','').split(';')
-		id        = atributos[col_id]
-		data	  = atributos[col_data_hora].split(' ')[0]
-		usuario	  = atributos[col_usu]
-		rua	  = atributos[col_rua]
-		x	  = atributos[col_x]
-		y	  = atributos[col_y]
-
-		if id not in registros_analisados:
-			registros_analisados.append(id)
-			acidentes_novo.append(registro+';'+id)
-			acidentes.remove(registro)
-		
-			
-			for registro_ in acidentes[:]:
-				atributos_ = registro_.replace('\n','').split(';')
-				id_        = atributos_[col_id]
-				data_	   = atributos_[col_data_hora].split(' ')[0]
-				usuario_   = atributos_[col_usu]
-				rua_	   = atributos_[col_rua]
-				x_	   = atributos_[col_x]
-				y_	   = atributos_[col_y]
-
-				if data < data_:
-					break
-				if id_ not in registros_analisados:
-					if data == data_ and id != id_:
-						hora      = int(datetime.datetime.strptime(atributos[col_data_hora].split(' ')[1], '%H:%M:%S').strftime("%s"))
-						hora_ 	  = int(datetime.datetime.strptime(atributos_[col_data_hora].split(' ')[1],'%H:%M:%S').strftime("%s"))					
-						if (abs(hora-hora_)/60) <= 60.00 :
-							distancia = distancia_entre_pontos((x,y),(x_,y_))
-							if distancia <= 50.00:
-								registros_analisados.append(id_)
-								acidentes_novo.append(registro_+';'+id+'\n')
-	print "\nNumeros: "+str(len(acidentes_novo))+','+str(len(acidentes))
-	#Parte II:
-	saida = open(arquivo_.replace('.csv','')+'_saida.csv','w')
-	for registro in acidentes_novo:
-		saida.write(registro.replace('\n','')+'\n')	
-
-def teste_banco(arquivo_,col_id,col_data_hora,col_usu,col_rua,col_x,col_y):
-	entrada 	= open(arquivo_,'r')
-	saida   	= open(arquivo_.replace('.csv','_merged.csv'),'w')
+def merge_duplicate_events(file_,col_id,col_date_time,col_user,col_street,col_x,col_y):
+	file_in 	= open(file_,'r')
+	file_out   	= open(file_.replace('.csv','_merged.csv'),'w')
 	credentials 	= open("credentials_db",'r').readline().strip().split(',')
-	print credentials
 	processed_rows 	= []
-	header  = entrada.readline()
-	numero_linhas = 0
+	header  = file_in.readline().strip()
+	file_out.write(header+";lon_merged;lat_merged;numer_matches\n")
+	row_number = 0
+
 	try:
-    		conn = psycopg2.connect("dbname='"+credentials[0]+"' user='"+credentials[1]+"' host='"+credentials[2]+"' password='"+credentials[3]+"'")
+		conn = psycopg2.connect("dbname='"+credentials[0]+"' user='"+credentials[1]+"' host='"+credentials[2]+"' password='"+credentials[3]+"'")
 		print "Connected to database"
 	except:
-    		print "I am unable to connect to the database"
+		print "I am unable to connect to the database"
 	cur = conn.cursor()
 	
-	for registro in entrada:
+	for row_file in file_in:
+		number_matches  = 0
 		rows 		= []
 		same_event 	= []
 		same_event_coordinates = []
 		
-		numero_linhas += 1
-		print numero_linhas
+		row_number += 1
+		print row_number
 
-		atributos = registro.replace('\n','').split(';')
-		id        = atributos[col_id]
-		data	  = atributos[col_data_hora].split(' ')[0]
-		hora      = datetime.datetime.strptime(atributos[col_data_hora], '%Y-%m-%d %H:%M:%S')
-		usuario	  = atributos[col_usu]
-		rua	  = atributos[col_rua]
-		x	  = atributos[col_x]
-		y	  = atributos[col_y]
+		attributes = row_file.replace('\n','').split(';')
+		id        = attributes[col_id]  # @ReservedAssignment
+		data	  = attributes[col_date_time].split(' ')[0]
+		time      = datetime.datetime.strptime(attributes[col_date_time], '%Y-%m-%d %H:%M:%S')
+		user	  = attributes[col_user]  # @UnusedVariable
+		street	  = attributes[col_street]  # @UnusedVariable
+		x	  = attributes[col_x]
+		y	  = attributes[col_y]
 	
 		if id not in processed_rows:
 
 			same_event_coordinates.append([float(x),float(y)])
-			same_event.append([hora,';'.join(atributos)])
+			same_event.append([time,';'.join(attributes)])
 			processed_rows.append(id)
 
 			cur.execute("SELECT * from event where date_event ="+"'"+data+"'"+"and id!="+"'"+id+"'" ) #executa query
 			rows = cur.fetchall() #armazena o que foi trazido a query
 	
-			for row in rows:
-				id_        = row[col_id]
-				data_	   = row[col_data_hora].strftime('%Y-%m-%d') #Recupera do banco como datetime, aqui converto pra string no formato certo
-				hora_ 	   = row[col_data_hora]
-				usuario_   = row[col_usu]
-				rua_	   = row[col_rua]
-				x_	   = row[col_x]
-				y_	   = row[col_y]
-			
-				difference_time = diferenca_tempo(hora,hora_)
-				if difference_time <= 60.00:
-					distance = distancia_entre_pontos((x,y),(x_,y_))
+			for row_db in rows:
+				id_        = row_db[col_id]
+				date_	   = row_db[col_date_time].strftime('%Y-%m-%d') #Recupera do banco como datetime, aqui converto pra string no formato certo @UnusedVariable
+				time_ 	   = row_db[col_date_time]
+				user_   = row_db[col_user]  # @UnusedVariable
+				street_	   = row_db[col_street]  # @UnusedVariable
+				x_	   = row_db[col_x]
+				y_	   = row_db[col_y]
+
+				time_difference = time_difference(time,time_)
+				
+				if time_difference <= 60.00:
+					distance = distance_between_points((x,y),(x_,y_))
+					
 					if distance <= 50.00:
+						row_ = ['' if attribute == None else str(attribute) for attribute in list(row_db)]
+						same_event_row = ';'.join(row_)
 						same_event_coordinates.append((float(x_),float(y_)))
-						same_event.append([hora_,';'.join(str(attribute) for attribute in row).replace('None','')])
+						same_event.append([time_,same_event_row])
 						processed_rows.append(id_)
+						number_matches +=1
 
 			if len(same_event)>1:
 				mean_coordinate  = np.mean(same_event_coordinates,axis=0)
-				new_event_row = str(sorted(same_event)[1][1])+";"+str(mean_coordinate[0])+";"+str(mean_coordinate[1])+"\n"	
-				saida.write(new_event_row)
+				new_event_row = str(sorted(same_event)[1][1])+";"+str(mean_coordinate[0])+";"+str(mean_coordinate[1])+";"+str(number_matches)+"\n"
+				file_out.write(new_event_row)
 			else:
-				saida.write(';'.join(atributos)+";;\n")
+				file_out.write(';'.join(attributes)+";0.0;0.0;"+str(number_matches)+"\n")
