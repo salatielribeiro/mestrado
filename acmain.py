@@ -5,6 +5,7 @@ from acarquivo import *
 import math
 from acgeo import *
 import datetime
+import numpy as np
 
 def main():
 	caminho_arquivo_waze 	= '/home/salatiel/Desktop/dados/belo_horizonte/acidentes/waze/acidentes_belo_horizonte_waze_0716_0517.csv'
@@ -20,7 +21,9 @@ def main():
 	#mescla_acidentes_repetidos(caminho_arquivo_waze,0,1,18,9,10,11)
 	#verifica_mescla(caminho_arquivo_waze,0)
 	teste_banco(caminho_arquivo_waze,0,1,18,9,10,11)
-	
-	
+
+	#coord1 = [[-43.964776,-19.865399],[-43.965160,-19.865700],[-43.965276,-19.865477]]
+
+	#print np.mean(coord1,axis=0)
 if __name__ == "__main__":
     main()
