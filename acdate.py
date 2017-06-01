@@ -19,21 +19,21 @@ def day_of_week(date_):
 
 #Dada uma data em milisegundos, retorna a data no formato desejado
 def millis_to_date(millis, format):  # @ReservedAssignment
-	millis = float(millis) / 1000.0
-	d_ = datetime.datetime.fromtimestamp(millis).strftime(format)
-	d =  datetime.datetime.strptime(d_, format)
+	millis	= float(millis) / 1000.0
+	d_		= datetime.datetime.fromtimestamp(millis).strftime(format)
+	d		= datetime.datetime.strptime(d_, format)
 	return d
 
 
 #Retorna os acidentes separados por mes
 def events_by_month(file_,col_date_time):
-	file_in = open(file_,'r')
-	month_tmp= []
-	month	= []
+	file_in 	= open(file_,'r')
+	month_tmp	= []
+	month		= []
 	for row in file_in:
-		attributes = row.replace('\n','').split(';')
-		date = attributes[col_date_time].split(' ')[0]
-		month_day = '-'.join(date.split('-')[:2])
+		attributes	= row.replace('\n','').split(';')
+		date		= attributes[col_date_time].split(' ')[0]
+		month_day	= '-'.join(date.split('-')[:2])
 		month.append(month_day)
 	for x in set(month):
 		month_tmp.append((x,month.count(x)))
@@ -42,13 +42,13 @@ def events_by_month(file_,col_date_time):
 	
 #Retorna os acidentes separados por dia da semana
 def events_by_day_of_week(file_,col_data_hora):
-	file_in = open(file_,'r')
-	day_week = []
-	day_week_count = []
+	file_in			= open(file_,'r')
+	day_week		= []
+	day_week_count	= []
 	for row in file_in:
-		attributes = row.replace('\n','').split(';')
-		date = attributes[col_data_hora].split(' ')[0]
-		day  = day_of_week(date)
+		attributes	= row.replace('\n','').split(';')
+		date		= attributes[col_data_hora].split(' ')[0]
+		day			= day_of_week(date)
 		day_week.append(day)
 	for x in set(day_week):
 		day_week_count.append((x,day_week.count(x)))
@@ -56,14 +56,14 @@ def events_by_day_of_week(file_,col_data_hora):
 
 #Retorna os acidentes separados por day (dd/mm/aaaa)
 def events_by_day(file_,col_date_time):
-	file_in = open(file_,'r')
-	day 		= []
-	day_tmp 	= []
+	file_in	= open(file_,'r')
+	day 	= []
+	day_tmp = []
 	for row in file_in:
-		attributes = row.replace('\n','').split(';')
-		date = attributes[col_date_time].split(' ')[0]
+		attributes	= row.replace('\n','').split(';')
+		date		= attributes[col_date_time].split(' ')[0]
 		day.append(date)
 	for x in set(day):
 		day_tmp.append((x,day.count(x)))
-	day = sorted(day_tmp)	
+	day		= sorted(day_tmp)	
 	return day
